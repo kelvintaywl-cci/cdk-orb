@@ -12,4 +12,3 @@ orbs:
   node: circleci/node@5
   slack: circleci/slack@3.4.2
   go: circleci/go@1.7.0
-  deploy: rollbar/deploy@1.0.1
