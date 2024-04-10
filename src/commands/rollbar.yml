@@ -14,17 +14,26 @@ parameters:
     description: the version of node to use in executor
     type: string
     default: "18.13.0"
+  yaml_file_path:
+    description: location of YAML file which contains the Rollbar token
+    type: string
+    default: "$CIRCLE_WORKING_DIRECTORY/config/env.yaml"
+  yaml_file_token_query:
+    description: yq query string to parse Rollbar token
+    type: string
+    default: ".defaults.rollbarToken"
 
 steps:
   - checkout
   - run:
       name: "Fix CIRCLE_WORKING_DIRECTORY"
       command: echo 'CIRCLE_WORKING_DIRECTORY="${CIRCLE_WORKING_DIRECTORY/#\~/$HOME}"' >> $BASH_ENV
+  # ASSUMPTION: project has a YAML file where the Rollbar token is stored.
   - run:
       name: get rollbar token
       command: |
         echo $CIRCLE_WORKING_DIRECTORY
-        echo 'export ROLLBAR_ACCESS_TOKEN=$(yq -r ".defaults.rollbarToken" $CIRCLE_WORKING_DIRECTORY/config/env.yaml)' >> "$BASH_ENV"
+        echo 'export ROLLBAR_ACCESS_TOKEN=$(yq -r "<< parameters.yaml_file_token_query >>" << parameters.yaml_file_path >>)' >> "$BASH_ENV"
   - run:
       name: Rollbar - Notify Deploy Succeeded
       command: |
